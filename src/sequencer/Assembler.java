@@ -59,20 +59,15 @@ public class Assembler {
 		
 		for (int firstIt = 0 ; firstIt < fragments.size() ; ++firstIt) {
 			for (int parseAll = 0 ; parseAll < fragments.size() ; ++parseAll) {
-				if (fragments.get(firstIt).calculateOverlap(fragments.get(parseAll)) > globalMaxOverlap) {
-					globalMaxOverlap = fragments.get(firstIt).calculateOverlap(fragments.get(parseAll));
-					firstMaxIDX = firstIt;
-					secondMaxIDX = parseAll;
-					globalTieBreaker = fragments.get(parseAll).length();
+				if (parseAll != firstIt) {	
+					int overlap = fragments.get(firstIt).calculateOverlap(fragments.get(parseAll));
+					if (overlap > globalMaxOverlap || (overlap == globalMaxOverlap && fragments.get(parseAll).length() < globalTieBreaker)) {
+						globalMaxOverlap = overlap;
+						firstMaxIDX = firstIt;
+						secondMaxIDX = parseAll;
+						globalTieBreaker = fragments.get(parseAll).length();
+					}
 				}
-				else if (fragments.get(firstIt).calculateOverlap(fragments.get(parseAll)) == globalMaxOverlap && fragments
-						.get(parseAll).length() < globalTieBreaker) 
-				{
-					firstMaxIDX = firstIt;
-					secondMaxIDX = parseAll;
-					globalTieBreaker = fragments.get(parseAll).length();
-				}
-
 			}
 		}
 		if (globalMaxOverlap == 0) {
@@ -80,12 +75,12 @@ public class Assembler {
 		}
 		else
 		{	
-			int firstRem = Math.max(firstMaxIDX, secondMaxIDX);
+			int firstRem = Math.min(firstMaxIDX, secondMaxIDX);
 			int secondRem = Math.max(firstMaxIDX, secondMaxIDX);
 			Fragment insert = new Fragment(fragments.get(firstMaxIDX).mergedWith(fragments.get(secondMaxIDX)).toString());
-			fragments.add(insert);
 			fragments.remove(firstRem);
-			fragments.remove(secondRem);
+			fragments.remove(secondRem - 1);
+			fragments.add(insert);
 			return true;
 		}
 	}
